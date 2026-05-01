@@ -1,4 +1,4 @@
-use crate::commands::command_definitions::{EXIT, ECHO};
+use crate::commands::command_definitions::*;
 use crate::commands::definition::shell_command::ShellCommand;
 use std::collections::HashMap;
 use std::sync::LazyLock;
@@ -12,6 +12,9 @@ pub static COMMAND_REGISTRY: LazyLock<HashMap<String, Box<dyn ShellCommand + Sen
 
         let echo_com : ECHO = ECHO::new();
         registry.insert(echo_com.props.name.clone(), Box::new(echo_com));
+
+        let type_com : TYPE = TYPE::new();
+        registry.insert(type_com.props.name.clone(), Box::new(type_com));
         
         registry
     });
