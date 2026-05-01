@@ -1,8 +1,14 @@
-#[allow(unused_imports)]
-use std::io::{self, Write};
+use std::io::{Write, stdin, stdout};
 
 fn main() {
-    // TODO: Uncomment the code below to pass the first stage
+    let mut input = String::new();
     print!("$ ");
-    io::stdout().flush().unwrap();
+    let _ = stdout().flush().unwrap();
+    stdin().read_line(&mut input).unwrap();
+    if let Some('\n') = input.chars().next_back() {
+        input.pop();
+        println!("{}: command not found", input)
+    }
+    
+    stdout().flush().unwrap();
 }
