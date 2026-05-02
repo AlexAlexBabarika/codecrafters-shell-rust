@@ -1,20 +1,20 @@
+use std::str::FromStr;
+
 use crate::commands::command_definitions::*;
-use crate::commands::definition::shell_command::ShellCommand;
-use std::collections::HashMap;
-use std::sync::LazyLock;
+use crate::commands::definition::command_names::CommandName;
+use crate::commands::definition::shell_command::{ShellCommand, ShellCommandError};
 
-pub static COMMAND_REGISTRY: LazyLock<HashMap<String, Box<dyn ShellCommand + Send + Sync>>> =
-    LazyLock::new(|| {
-        let mut registry: HashMap<String, Box<dyn ShellCommand + Send + Sync>> = HashMap::new();
-        
-        let exit_com: EXIT = EXIT::new();
-        registry.insert(exit_com.props.name.clone(), Box::new(exit_com));
+pub fn get_command(name: CommandName) -> Result<Box<dyn ShellCommand + Send + Sync>, ShellCommandError> {
+    let cmd: Box<dyn ShellCommand + Send + Sync> = match name {
+        CommandName::Exit => Box::new(EXIT::new()),
+        CommandName::Type => Box::new(TYPE::new()),
+        CommandName::Echo => Box::new(ECHO::new()),
+    };
+    Ok(cmd)
+}
 
-        let echo_com : ECHO = ECHO::new();
-        registry.insert(echo_com.props.name.clone(), Box::new(echo_com));
-
-        let type_com : TYPE = TYPE::new();
-        registry.insert(type_com.props.name.clone(), Box::new(type_com));
-        
-        registry
-    });
+pub fn get_command_from_str(raw: &str) -> Result<Box<dyn ShellCommand + Send + Sync>, ShellCommandError> {
+    let name =
+        CommandName::from_str(raw).map_err(|_| ShellCommandError::NotFoundError(raw.to_string()))?;
+    get_command(name)
+}

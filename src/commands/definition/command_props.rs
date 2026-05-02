@@ -1,4 +1,6 @@
+use crate::commands::definition::command_names::CommandName;
+
 pub struct CommandProps {
-    pub name: String,
+    pub name: CommandName,
     pub max_args: usize
 }
