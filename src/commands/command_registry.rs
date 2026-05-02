@@ -9,6 +9,7 @@ pub fn get_builtin_command(name: CommandName) -> Result<Box<dyn ShellCommand + S
         CommandName::Exit => Box::new(EXIT::new()),
         CommandName::Type => Box::new(TYPE::new()),
         CommandName::Echo => Box::new(ECHO::new()),
+        CommandName::Pwd => Box::new(PWD::new())
     };
     Ok(cmd)
 }

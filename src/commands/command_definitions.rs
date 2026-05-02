@@ -5,7 +5,6 @@ use crate::commands::definition::command_result::CommandResult;
 use crate::commands::command_names::CommandName;
 use crate::commands::codes::CompletionCode;
 use crate::util::check_arguments_length::check_arguments_length;
-use crate::util::is_shell_builtin::is_shell_builtin;
 
 // exit
 pub struct EXIT {
@@ -81,7 +80,7 @@ impl ShellCommand for TYPE {
     fn execute(&self, args: &[String]) -> Result<Option<CommandResult>, ShellCommandError> {        
         check_arguments_length(args, &self.props)?;
 
-        if is_shell_builtin(&args[0]).0 {
+        if crate::util::is_shell_builtin::is_shell_builtin(&args[0]).0 {
             return Ok(Some(
                 CommandResult {
                     message: format!("{} is a shell builtin", args[0]),
@@ -100,5 +99,52 @@ impl ShellCommand for TYPE {
         }
         
         return Err(ShellCommandError::NotFoundError(args[0].to_string()));
+    }
+}
+
+// type
+pub struct PWD {
+    pub props: CommandProps
+}
+
+impl PWD {
+    pub fn new() -> Self {
+        PWD {
+            props: CommandProps {
+                name: CommandName::Pwd,
+                max_args: 0 
+            }
+        }
+    }
+}
+
+impl ShellCommand for PWD {
+    fn execute(&self, args: &[String]) -> Result<Option<CommandResult>, ShellCommandError> {        
+        check_arguments_length(args, &self.props)?;
+
+        match std::env::current_dir() {
+            Err(e) => {
+                return Err(ShellCommandError::FailedToExecute {
+                    comm: self.props.name,
+                    reason: format!("Failed to get current directory. Reason: {}", e)
+                });
+            },
+            Ok(path) => {
+                if let Some(path_str) = path.to_str() {
+                    return Ok(Some(
+                        CommandResult {
+                            message: path_str.to_string(),
+                            code: CompletionCode::Success
+                        }
+                    ))
+                }
+                else {
+                    return Err(ShellCommandError::FailedToExecute {
+                        comm: self.props.name,
+                        reason: "Failed to convert path to string".to_string()
+                    });
+                }
+            }
+        }
     }
 }

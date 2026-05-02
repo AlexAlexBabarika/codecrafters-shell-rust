@@ -22,7 +22,7 @@ pub fn find_executable(exe_name: &str) -> Option<String> {
             let full_path = dir.join(exe_name);
             if let Some(string_path) = full_path.to_str() {
                 if check_if_executable(string_path) {
-                    Some(full_path.to_str().unwrap().to_string())
+                    Some(string_path.to_string())
                 } else {
                     None
                 }
