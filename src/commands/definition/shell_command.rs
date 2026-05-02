@@ -16,7 +16,7 @@ pub enum ShellCommandError {
         max_args: usize
     },
 
-    #[error("{comm}: no arguments have been provided. You can provide {max_args} arguments")]
+    #[error("{comm}: no arguments have been provided. You can provide {max_args} argument(s)")]
     NoArgs{
         comm: String,
         max_args: usize

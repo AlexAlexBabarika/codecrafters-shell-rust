@@ -81,7 +81,7 @@ impl ShellCommand for TYPE {
     fn execute(&self, args: &[String]) -> Result<Option<CommandResult>, ShellCommandError> {        
         check_arguments_length(args, &self.props)?;
 
-        if is_shell_builtin(&args[0]) {
+        if is_shell_builtin(&args[0]).0 {
             return Ok(Some(
                 CommandResult {
                     message: format!("{} is a shell builtin", args[0]),

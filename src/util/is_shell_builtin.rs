@@ -1,9 +1,10 @@
-use std::str::FromStr;
-use crate::commands::command_names::CommandName;
+use crate::commands::command_registry::get_builtin_command_from_str;
+use crate::commands::definition::shell_command::ShellCommand;
 
-pub fn is_shell_builtin(command_name: &str) -> bool {
-    match CommandName::from_str(command_name) {
-        Err(_e) => false,
-        Ok(_) => true
+pub fn is_shell_builtin(command_name: &str) -> (bool, Option<Box<dyn ShellCommand + Send + Sync>>) {
+    if let Ok(cmd) = get_builtin_command_from_str(command_name) {
+        (true, Some(cmd))
+    } else {
+        (false, None)
     }
 }

@@ -1,5 +1,6 @@
 use std::io::{stdin, stdout, Write};
-use crate::commands::command_registry::get_command_from_str;
+use crate::util::is_shell_builtin::is_shell_builtin;
+use crate::util::execute_external_command::execute_external_command;
 mod commands;
 mod util;
 
@@ -18,16 +19,15 @@ fn main() {
             }
 
             let args: Vec<String> = input.split_whitespace().map(|s| s.to_string()).collect();
-            match get_command_from_str(&args[0]) {
-                Ok(cmd) => {
-                    let command_args = &args[1..];
-                    match cmd.execute(command_args) {
-                        Ok(Some(result)) => println!("{}", result),
-                        Ok(None) => print!("The command returned None"),
-                        Err(e) => println!("{}", e)
-                    }
-                },
-                Err(e) => println!("{}", e)
+            if let (true, Some(cmd)) = is_shell_builtin(&args[0]) {
+                match cmd.execute(&args[1..]) {
+                    Ok(Some(result)) => println!("{}", result),
+                    Ok(None) => print!("The command returned None"),
+                    Err(e) => println!("{}", e)
+                }
+            } 
+            else {
+                execute_external_command(&args[0], &args[1..]);
             }
 
             input.clear();
