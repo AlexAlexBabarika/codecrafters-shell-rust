@@ -2,9 +2,10 @@ use crate::commands::definition::command_props::CommandProps;
 use crate::commands::definition::shell_command::ShellCommand;
 use crate::commands::definition::shell_command::ShellCommandError;
 use crate::commands::definition::command_result::CommandResult;
-use crate::commands::definition::command_names::CommandName;
+use crate::commands::command_names::CommandName;
 use crate::commands::codes::CompletionCode;
 use crate::util::check_arguments_length::check_arguments_length;
+use crate::util::is_shell_builtin::is_shell_builtin;
 
 // exit
 pub struct EXIT {
@@ -79,6 +80,15 @@ impl TYPE {
 impl ShellCommand for TYPE {
     fn execute(&self, args: &[String]) -> Result<Option<CommandResult>, ShellCommandError> {        
         check_arguments_length(args, &self.props)?;
+
+        if is_shell_builtin(&args[0]) {
+            return Ok(Some(
+                CommandResult {
+                    message: format!("{} is a shell builtin", args[0]),
+                    code: CompletionCode::Success
+                }
+            ))
+        }
 
         if let Some(exe) = crate::util::find_executable::find_executable(&args[0]) {
             return Ok(Some(

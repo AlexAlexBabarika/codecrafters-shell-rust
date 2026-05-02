@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use crate::commands::command_definitions::*;
-use crate::commands::definition::command_names::CommandName;
+use crate::commands::command_names::CommandName;
 use crate::commands::definition::shell_command::{ShellCommand, ShellCommandError};
 
 pub fn get_command(name: CommandName) -> Result<Box<dyn ShellCommand + Send + Sync>, ShellCommandError> {

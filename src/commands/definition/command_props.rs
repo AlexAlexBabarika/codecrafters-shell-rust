@@ -1,4 +1,4 @@
-use crate::commands::definition::command_names::CommandName;
+use crate::commands::command_names::CommandName;
 
 pub struct CommandProps {
     pub name: CommandName,
