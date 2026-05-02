@@ -26,7 +26,7 @@ fn main() {
                             println!("{}", msg);
                         }
                     }
-                    Ok(None) => print!("The command returned None"),
+                    Ok(None) => {},
                     Err(e) => println!("{}", e)
                 }
             } 
