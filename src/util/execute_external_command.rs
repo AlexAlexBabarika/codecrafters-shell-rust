@@ -1,7 +1,10 @@
 use std::process::Command;
-pub fn execute_external_command(command: &str, args: &[String]) -> std::process::Child {
-    Command::new(command)
+
+pub fn execute_external_command(command: &str, args: &[String]) -> Result<(), std::io::Error> {
+    let mut child = Command::new(command)
         .args(args)
-        .spawn()
-        .expect("Failed to execute!")
+        .spawn()?;
+
+    child.wait()?;
+    Ok(())
 }

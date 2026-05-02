@@ -27,7 +27,8 @@ fn main() {
                 }
             } 
             else {
-                execute_external_command(&args[0], &args[1..]);
+                execute_external_command(&args[0], &args[1..])
+                    .unwrap_or_else(|e| println!("Error executing external command: {}", e));
             }
 
             input.clear();
