@@ -215,7 +215,7 @@ impl ShellCommand for CD {
             Err(e) => {
                 return Err(ShellCommandError::FailedToExecute {
                     comm: self.props.name,
-                    reason: format!("Failed to change directory. Reason: {}", e)
+                    reason: String::new()
                 });
             },
             Ok(_) => {
