@@ -28,7 +28,7 @@ fn main() {
             } 
             else {
                 execute_external_command(&args[0], &args[1..])
-                    .unwrap_or_else(|e| println!("{0}: {1}", &args[0], e));
+                    .unwrap_or_else(|e| println!("{}", e));
             }
 
             input.clear();
