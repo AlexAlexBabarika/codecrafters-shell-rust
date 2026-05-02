@@ -170,10 +170,10 @@ impl ShellCommand for CD {
         check_arguments_length(args, &self.props)?;
 
 
-        if let Err(e) = std::env::set_current_dir(std::path::Path::new(&args[0])) {
+        if let Err(_e) = std::env::set_current_dir(std::path::Path::new(&args[0])) {
             return Err(ShellCommandError::FailedToExecute {
                 comm: self.props.name,
-                reason: format!("Failed to change directory.\n{}", e)
+                reason: format!("{}: No such file or directory", args.get(0).unwrap_or(&"".to_string()))
             });
         }
         else {

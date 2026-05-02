@@ -7,7 +7,7 @@ pub enum ShellCommandError {
     #[error("{0}: not found")]
     NotFoundError(String),
 
-    #[error("{comm}: failed to execute.\nReason: {reason}")]
+    #[error("{comm}: {reason}")]
     #[allow(dead_code)]
     FailedToExecute{
         comm: CommandName,
