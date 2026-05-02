@@ -29,24 +29,8 @@ fn main() {
                 },
                 Err(e) => println!("{}", e)
             }
-            
-            // if !(COMMAND_REGISTRY.contains_key(&args[0])) {
-            //     println!("{}: command not found", input);
-            // } else {
-            //     let command = &COMMAND_REGISTRY[&args[0]];
-            //     let command_args = &args[1..];
-
-            //     match command.execute(command_args) {
-            //         Ok(Some(result)) => println!("{}", result),
-            //         Ok(None) => {},
-            //         Err(e) => println!("{}", e)
-            //     }
-            // }
 
             input.clear();
         }   
     }
-
-    // println!("{0}", env::var_os("PATH").unwrap().into_string().unwrap());
-    // println!("{:?}", find_it("ls"));
 }

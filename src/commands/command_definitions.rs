@@ -89,6 +89,6 @@ impl ShellCommand for TYPE {
             ))
         }
         
-        return Err(ShellCommandError::NotFoundError(self.props.name.to_string()));
+        return Err(ShellCommandError::NotFoundError(args[0].to_string()));
     }
 }
