@@ -1,3 +1,6 @@
+use std::env::set_current_dir;
+use std::io;
+
 use crate::commands::definition::command_props::CommandProps;
 use crate::commands::definition::shell_command::ShellCommand;
 use crate::commands::definition::shell_command::ShellCommandError;
@@ -102,7 +105,7 @@ impl ShellCommand for TYPE {
     }
 }
 
-// type
+// pwd
 pub struct PWD {
     pub props: CommandProps
 }
@@ -145,6 +148,44 @@ impl ShellCommand for PWD {
                     });
                 }
             }
+        }
+    }
+}
+
+// cd
+pub struct CD {
+    pub props: CommandProps
+}
+
+impl CD {
+    pub fn new() -> Self {
+        CD {
+            props: CommandProps {
+                name: CommandName::Cd,
+                max_args: 1
+            }
+        }
+    }
+}
+
+impl ShellCommand for CD {
+    fn execute(&self, args: &[String]) -> Result<Option<CommandResult>, ShellCommandError> {        
+        check_arguments_length(args, &self.props)?;
+
+
+        if let Err(e) = std::env::set_current_dir(std::path::Path::new(&args[0])) {
+            return Err(ShellCommandError::FailedToExecute {
+                comm: self.props.name,
+                reason: format!("Failed to change directory.\n{}", e)
+            });
+        }
+        else {
+            return Ok(Some(
+                CommandResult {
+                    message: String::new(),
+                    code: CompletionCode::Success
+                }
+            ))
         }
     }
 }

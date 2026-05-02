@@ -6,7 +6,8 @@ pub enum CommandName {
     Echo,
     Type,
     Exit,
-    Pwd
+    Pwd,
+    Cd
 }
 
 impl CommandName {
@@ -16,6 +17,7 @@ impl CommandName {
             Self::Type => "type",
             Self::Exit => "exit",
             Self::Pwd => "pwd"
+            Self::Cd => "cd"
         }
     }
 }
@@ -38,6 +40,7 @@ impl FromStr for CommandName {
             "type" => Ok(Self::Type),
             "exit" => Ok(Self::Exit),
             "pwd" => Ok(Self::Pwd),
+            "cd" => Ok(Self::Cd),
             _ => Err(UnknownCommandName),
         }
     }
