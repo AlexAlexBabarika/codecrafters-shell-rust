@@ -21,7 +21,11 @@ fn main() {
             let args: Vec<String> = input.split_whitespace().map(|s| s.to_string()).collect();
             if let (true, Some(cmd)) = is_shell_builtin(&args[0]) {
                 match cmd.execute(&args[1..]) {
-                    Ok(Some(result)) => println!("{}", result),
+                    Ok(Some(result)) => {
+                        if let Some(msg) = result.message {
+                            println!("{}", msg);
+                        }
+                    }
                     Ok(None) => print!("The command returned None"),
                     Err(e) => println!("{}", e)
                 }

@@ -16,7 +16,7 @@ impl CommandName {
             Self::Echo => "echo",
             Self::Type => "type",
             Self::Exit => "exit",
-            Self::Pwd => "pwd"
+            Self::Pwd => "pwd",
             Self::Cd => "cd"
         }
     }

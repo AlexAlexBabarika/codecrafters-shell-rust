@@ -1,6 +1,3 @@
-use std::env::set_current_dir;
-use std::io;
-
 use crate::commands::definition::command_props::CommandProps;
 use crate::commands::definition::shell_command::ShellCommand;
 use crate::commands::definition::shell_command::ShellCommandError;
@@ -56,7 +53,7 @@ impl ShellCommand for ECHO {
         
         Ok(Some(
             CommandResult {
-                message: result,
+                message: Some(result),
                 code: CompletionCode::Success
             }
         ))
@@ -86,7 +83,7 @@ impl ShellCommand for TYPE {
         if crate::util::is_shell_builtin::is_shell_builtin(&args[0]).0 {
             return Ok(Some(
                 CommandResult {
-                    message: format!("{} is a shell builtin", args[0]),
+                    message: Some(format!("{} is a shell builtin", args[0])),
                     code: CompletionCode::Success
                 }
             ))
@@ -95,7 +92,7 @@ impl ShellCommand for TYPE {
         if let Some(exe) = crate::util::find_executable::find_executable(&args[0]) {
             return Ok(Some(
                 CommandResult {
-                    message: exe,
+                    message: Some(exe),
                     code: CompletionCode::Success
                 }
             ))
@@ -136,7 +133,7 @@ impl ShellCommand for PWD {
                 if let Some(path_str) = path.to_str() {
                     return Ok(Some(
                         CommandResult {
-                            message: path_str.to_string(),
+                            message: Some(path_str.to_string()),
                             code: CompletionCode::Success
                         }
                     ))
@@ -182,7 +179,7 @@ impl ShellCommand for CD {
         else {
             return Ok(Some(
                 CommandResult {
-                    message: String::new(),
+                    message: None,
                     code: CompletionCode::Success
                 }
             ))
