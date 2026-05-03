@@ -7,7 +7,7 @@ pub enum CommandName {
     Type,
     Exit,
     Pwd,
-    Cd
+    Cd,
 }
 
 impl CommandName {
@@ -17,7 +17,7 @@ impl CommandName {
             Self::Type => "type",
             Self::Exit => "exit",
             Self::Pwd => "pwd",
-            Self::Cd => "cd"
+            Self::Cd => "cd",
         }
     }
 }

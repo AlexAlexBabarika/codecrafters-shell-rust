@@ -1,12 +1,12 @@
-use std::io::{stdin, stdout, Write};
-use crate::util::is_shell_builtin::is_shell_builtin;
 use crate::util::execute_external_command::execute_external_command;
+use crate::util::is_shell_builtin::is_shell_builtin;
+use std::io::{Write, stdin, stdout};
 mod commands;
 mod util;
 
 fn main() {
     let mut input = String::new();
-    
+
     loop {
         print!("$ ");
         let _ = stdout().flush().unwrap();
@@ -21,21 +21,19 @@ fn main() {
             let args: Vec<String> = input.split_whitespace().map(|s| s.to_string()).collect();
             if let (true, Some(cmd)) = is_shell_builtin(&args[0]) {
                 match cmd.execute(&args[1..]) {
-                    Ok(Some(result)) => {
+                    Ok(result) => {
                         if let Some(msg) = result.message {
                             println!("{}", msg);
                         }
-                    }
-                    Ok(None) => {},
+                    },
                     Err(e) => println!("{}", e)
                 }
-            } 
-            else {
+            } else {
                 execute_external_command(&args[0], &args[1..])
                     .unwrap_or_else(|e| println!("{}", e));
             }
 
             input.clear();
-        }   
+        }
     }
 }
