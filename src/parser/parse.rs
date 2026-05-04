@@ -25,12 +25,20 @@ pub fn parse_input(buff: &mut String) -> Result<Vec<String>, ParseError> {
                 }
                 chars.next();
             }
-            '\'' if !is_double_quoted => {
-                is_single_quoted = !is_single_quoted;
+            '\'' => {
+                if is_double_quoted {
+                    curr_arg.push(c);
+                } else {
+                    is_single_quoted = !is_single_quoted;
+                }
                 chars.next();
             }
-            '"' if !is_single_quoted => {
-                is_double_quoted = !is_double_quoted;
+            '"' => {
+                if is_single_quoted {
+                    curr_arg.push(c);
+                } else {
+                    is_double_quoted = !is_double_quoted;
+                }
                 chars.next();
             }
             _ => {
