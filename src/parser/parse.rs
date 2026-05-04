@@ -18,7 +18,7 @@ pub fn parse_input(buff: &mut String) -> Result<Vec<String>, ParseError> {
 
     while let Some(&c) = chars.peek() {
         match c {
-            ' ' | '\t' if !is_single_quoted => {
+            ' ' | '\t' if !(is_single_quoted || is_double_quoted) => {
                 if !curr_arg.is_empty() {
                     args.push(curr_arg.clone());
                     curr_arg.clear();
