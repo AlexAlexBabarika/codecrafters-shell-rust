@@ -79,7 +79,7 @@ impl Execute for CD {
         let new_path = self.build_path(&base_path, subargs)?;
         std::env::set_current_dir(&new_path).map_err(|_e| {
             self.fail(format!(
-                "Failed to change directory to {}",
+                "{}: No such file or directory",
                 new_path.to_str().unwrap_or("")
             ))
         })?;
