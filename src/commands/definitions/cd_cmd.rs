@@ -73,14 +73,14 @@ impl Execute for CD {
         };
 
         let new_path = self.build_path(&current_path, subargs)?;
-        // std::env::set_current_dir(&new_path).map_err(|_e| {
-        //     self.fail(format!(
-        //         "Failed to change directory to {}",
-        //         new_path.to_str().unwrap_or("")
-        //     ))
-        // })?;
-        // 
-        std::env::set_current_dir(&new_path).unwrap_or_default();
+        std::env::set_current_dir(&new_path).map_err(|_e| {
+            self.fail(format!(
+                "Failed to change directory to {}",
+                new_path.to_str().unwrap_or("")
+            ))
+        })?;
+        
+        
         Ok(CommandResult { message: (None) })
     }
 }
