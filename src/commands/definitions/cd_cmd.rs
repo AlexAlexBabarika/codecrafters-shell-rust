@@ -65,24 +65,25 @@ impl Execute for CD {
             .filter(|s| !s.is_empty())
             .collect::<Vec<&str>>();
 
-        let current_path: PathBuf = match std::env::current_dir() {
-            Err(_e) => {
-                return Err(self.fail("Failed to get current directory".to_string()));
+        let base_path: PathBuf = if args[0].starts_with('/') {
+            PathBuf::from("/")
+        } else {
+            match std::env::current_dir() {
+                Err(_e) => {
+                    return Err(self.fail("Failed to get current directory".to_string()));
+                }
+                Ok(path) => path,
             }
-            Ok(path) => path,
         };
 
-        let new_path = self.build_path(&current_path, subargs)?;
-        // std::env::set_current_dir(&new_path).map_err(|_e| {
-        //     self.fail(format!(
-        //         "Failed to change directory to {}",
-        //         new_path.to_str().unwrap_or("")
-        //     ))
-        // })?;
-        // 
-        std::env::set_current_dir(&new_path);
-        
-        
+        let new_path = self.build_path(&base_path, subargs)?;
+        std::env::set_current_dir(&new_path).map_err(|_e| {
+            self.fail(format!(
+                "Failed to change directory to {}",
+                new_path.to_str().unwrap_or("")
+            ))
+        })?;
+
         Ok(CommandResult { message: (None) })
     }
 }
