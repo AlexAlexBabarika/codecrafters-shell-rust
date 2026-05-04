@@ -80,7 +80,7 @@ impl Execute for CD {
         //     ))
         // })?;
         // 
-        std::env::set_current_dir(&new_path).unwrap();
+        std::env::set_current_dir(&new_path).unwrap_or_default();
         Ok(CommandResult { message: (None) })
     }
 }
