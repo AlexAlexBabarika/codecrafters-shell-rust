@@ -1,11 +1,8 @@
-use crate::commands::codes::CompletionCode;
 use std::fmt;
 
 #[derive(Debug)]
 pub struct CommandResult {
     pub message: Option<String>,
-    #[allow(dead_code)]
-    pub code: CompletionCode,
 }
 
 impl fmt::Display for CommandResult {

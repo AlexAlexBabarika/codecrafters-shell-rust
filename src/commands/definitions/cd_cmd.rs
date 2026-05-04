@@ -1,9 +1,7 @@
-use crate::commands::shell_command::ShellCommand;
-use crate::commands::shell_command::ShellCommandError;
 use crate::commands::command_names::CommandName;
 use crate::commands::command_props::CommandProps;
 use crate::commands::command_result::CommandResult;
-use crate::commands::codes::CompletionCode;
+use crate::commands::shell_command::{Execute, Fail, ShellCommandError};
 use crate::util::check_arguments_length::check_arguments_length;
 use std::path::PathBuf;
 
@@ -20,36 +18,19 @@ impl CD {
             },
         }
     }
-}
 
-impl ShellCommand for CD {
-    fn execute(&self, args: &[String]) -> Result<CommandResult, ShellCommandError> {
-        check_arguments_length(args, &self.props)?;
+    fn build_path(
+        &self,
+        current_path: &PathBuf,
+        args: Vec<&str>,
+    ) -> Result<PathBuf, ShellCommandError> {
+        let mut new_path = current_path.clone();
 
-        let subargs = args[0]
-            .split("/")
-            .filter(|s| !s.is_empty())
-            .collect::<Vec<&str>>();
-
-        let current_path: PathBuf = match std::env::current_dir() {
-            Err(_e) => {
-                return Err(ShellCommandError::FailedToExecute {
-                    comm: self.props.name,
-                    reason: "Failed to get current directory".to_string(),
-                });
-            }
-            Ok(path) => path,
-        };
-        let mut new_path = PathBuf::new();
-
-        for subarg in subargs.iter() {
+        for subarg in args.iter() {
             if subarg.contains('~') {
                 new_path = match std::env::home_dir() {
                     None => {
-                        return Err(ShellCommandError::FailedToExecute {
-                            comm: self.props.name,
-                            reason: "Failed to get home directory".to_string(),
-                        });
+                        return Err(self.fail("Failed to get home directory".to_string()));
                     }
                     Some(home) => home,
                 };
@@ -62,19 +43,42 @@ impl ShellCommand for CD {
             }
         }
 
-        match std::env::set_current_dir(new_path) {
-            Err(_e) => {
-                return Err(ShellCommandError::FailedToExecute {
-                    comm: self.props.name,
-                    reason: String::new(),
-                });
-            }
-            Ok(_) => {
-                return Ok(CommandResult {
-                    message: None,
-                    code: CompletionCode::Success,
-                });
-            }
+        Ok(new_path)
+    }
+}
+
+impl Fail for CD {
+    fn fail(&self, reason: String) -> ShellCommandError {
+        ShellCommandError::FailedToExecute {
+            comm: self.props.name,
+            reason,
         }
+    }
+}
+
+impl Execute for CD {
+    fn execute(&self, args: &[String]) -> Result<CommandResult, ShellCommandError> {
+        check_arguments_length(args, &self.props)?;
+
+        let subargs = args[0]
+            .split("/")
+            .filter(|s| !s.is_empty())
+            .collect::<Vec<&str>>();
+
+        let current_path: PathBuf = match std::env::current_dir() {
+            Err(_e) => {
+                return Err(self.fail("Failed to get current directory".to_string()));
+            }
+            Ok(path) => path,
+        };
+
+        let new_path = self.build_path(&current_path, subargs)?;
+        std::env::set_current_dir(&new_path).map_err(|_e| {
+            self.fail(format!(
+                "Failed to change directory to {}",
+                new_path.to_str().unwrap_or("")
+            ))
+        })?;
+        Ok(CommandResult { message: (None) })
     }
 }

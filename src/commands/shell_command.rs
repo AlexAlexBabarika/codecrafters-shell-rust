@@ -18,6 +18,10 @@ pub enum ShellCommandError {
     NoArgs { comm: CommandName, max_args: usize },
 }
 
-pub trait ShellCommand {
+pub trait Execute {
     fn execute(&self, args: &[String]) -> Result<CommandResult, ShellCommandError>;
+}
+
+pub trait Fail {
+    fn fail(&self, reason: String) -> ShellCommandError;
 }

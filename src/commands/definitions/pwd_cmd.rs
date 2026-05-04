@@ -1,9 +1,7 @@
-use crate::commands::shell_command::ShellCommand;
-use crate::commands::shell_command::ShellCommandError;
 use crate::commands::command_names::CommandName;
 use crate::commands::command_props::CommandProps;
 use crate::commands::command_result::CommandResult;
-use crate::commands::codes::CompletionCode;
+use crate::commands::shell_command::{Execute, Fail, ShellCommandError};
 use crate::util::check_arguments_length::check_arguments_length;
 
 pub struct PWD {
@@ -21,28 +19,30 @@ impl PWD {
     }
 }
 
-impl ShellCommand for PWD {
+impl Fail for PWD {
+    fn fail(&self, reason: String) -> ShellCommandError {
+        ShellCommandError::FailedToExecute {
+            comm: self.props.name,
+            reason,
+        }
+    }
+}
+
+impl Execute for PWD {
     fn execute(&self, args: &[String]) -> Result<CommandResult, ShellCommandError> {
         check_arguments_length(args, &self.props)?;
 
         match std::env::current_dir() {
             Err(e) => {
-                return Err(ShellCommandError::FailedToExecute {
-                    comm: self.props.name,
-                    reason: format!("Failed to get current directory. Reason: {}", e),
-                });
+                return Err(self.fail(format!("Failed to get current directory. Reason: {}", e)));
             }
             Ok(path) => {
                 if let Some(path_str) = path.to_str() {
                     return Ok(CommandResult {
                         message: Some(path_str.to_string()),
-                        code: CompletionCode::Success,
                     });
                 } else {
-                    return Err(ShellCommandError::FailedToExecute {
-                        comm: self.props.name,
-                        reason: "Failed to convert path to string".to_string(),
-                    });
+                    return Err(self.fail("Failed to convert path to string".to_string()));
                 }
             }
         }

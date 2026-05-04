@@ -25,8 +25,8 @@ fn main() {
                         if let Some(msg) = result.message {
                             println!("{}", msg);
                         }
-                    },
-                    Err(e) => println!("{}", e)
+                    }
+                    Err(e) => println!("{}", e),
                 }
             } else {
                 execute_external_command(&args[0], &args[1..])
