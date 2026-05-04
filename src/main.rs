@@ -6,8 +6,8 @@ use crate::util::is_shell_builtin::is_shell_builtin;
 use std::io::{Write, stdin, stdout};
 
 mod commands;
-mod util;
 mod parser;
+mod util;
 
 fn main() {
     let mut input: String = String::new();
@@ -36,8 +36,7 @@ fn main() {
                 Err(e) => println!("{}", e),
             }
         } else {
-            execute_external_command(&args[0], &args[1..])
-                .unwrap_or_else(|e| println!("{}", e));
+            execute_external_command(&args[0], &args[1..]).unwrap_or_else(|e| println!("{}", e));
         }
 
         input.clear();

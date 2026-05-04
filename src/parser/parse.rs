@@ -4,15 +4,17 @@ pub fn parse_input(buff: &mut String) -> Result<Vec<String>, ParseError> {
     if let Some('\n') = buff.chars().next_back() {
         buff.pop();
     }
-    
+
     if buff.is_empty() {
         return Err(ParseError::EmptyInput);
     }
-    
+
     let mut args: Vec<String> = Vec::new();
     let mut chars = buff.chars().peekable();
     let mut curr_arg: String = String::new();
+
     let mut is_single_quoted: bool = false;
+    let mut is_double_quoted: bool = false;
 
     while let Some(&c) = chars.peek() {
         match c {
@@ -22,11 +24,15 @@ pub fn parse_input(buff: &mut String) -> Result<Vec<String>, ParseError> {
                     curr_arg.clear();
                 }
                 chars.next();
-            },
-            '\'' => {
+            }
+            '\'' if !is_double_quoted => {
                 is_single_quoted = !is_single_quoted;
                 chars.next();
-            },
+            }
+            '"' if !is_single_quoted => {
+                is_double_quoted = !is_double_quoted;
+                chars.next();
+            }
             _ => {
                 curr_arg.push(c);
                 chars.next();
@@ -41,6 +47,6 @@ pub fn parse_input(buff: &mut String) -> Result<Vec<String>, ParseError> {
     if !curr_arg.is_empty() {
         args.push(curr_arg.clone());
     }
-    
+
     Ok(args)
 }
