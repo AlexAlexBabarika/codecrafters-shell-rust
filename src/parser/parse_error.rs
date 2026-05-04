@@ -4,6 +4,8 @@ use thiserror::Error;
 pub enum ParseError {
     #[error("Can't parse an input with an unclosed single quote")]
     UnclosedSingleQuote,
+    #[error("Can't parse an input with an unclosed double quote")]
+    UnclosedDoubleQuote,
     #[error("Please provide input. Write 'exit' to exit the shell")]
     EmptyInput,
 }

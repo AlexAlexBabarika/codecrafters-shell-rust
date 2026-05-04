@@ -34,11 +34,16 @@ pub fn parse_input(buff: &mut String) -> Result<Vec<String>, ParseError> {
                 chars.next();
             }
             '"' => {
-                if is_single_quoted {
-                    curr_arg.push(c);
+                if !is_double_quoted {
+                    if is_single_quoted {
+                        curr_arg.push(c);
+                    } else {
+                        is_double_quoted = true;
+                    }
                 } else {
-                    is_double_quoted = !is_double_quoted;
+                    is_double_quoted = false;
                 }
+
                 chars.next();
             }
             _ => {
@@ -50,6 +55,10 @@ pub fn parse_input(buff: &mut String) -> Result<Vec<String>, ParseError> {
 
     if is_single_quoted {
         return Err(ParseError::UnclosedSingleQuote);
+    }
+
+    if is_double_quoted {
+        return Err(ParseError::UnclosedDoubleQuote);
     }
 
     if !curr_arg.is_empty() {
