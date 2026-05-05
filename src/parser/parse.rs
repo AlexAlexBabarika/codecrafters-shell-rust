@@ -1,7 +1,7 @@
 use crate::parser::parse_error::ParseError;
 
 pub fn parse_input(buff: &mut String) -> Result<Vec<String>, ParseError> {
-    if let Some('\n') = buff.chars().next_back() {
+    while matches!(buff.chars().next_back(), Some('\n' | '\r')) {
         buff.pop();
     }
 
@@ -9,46 +9,59 @@ pub fn parse_input(buff: &mut String) -> Result<Vec<String>, ParseError> {
         return Err(ParseError::EmptyInput);
     }
 
-    let mut args: Vec<String> = Vec::new();
+    let mut args = Vec::new();
     let mut chars = buff.chars().peekable();
-    let mut curr_arg: String = String::new();
-
-    let mut is_single_quoted: bool = false;
-    let mut is_double_quoted: bool = false;
+    let mut curr_arg = String::new();
+    let mut in_single = false;
+    let mut in_double = false;
 
     while let Some(&c) = chars.peek() {
         match c {
-            ' ' | '\t' if !(is_single_quoted || is_double_quoted) => {
+            ' ' | '\t' if !in_single && !in_double => {
                 if !curr_arg.is_empty() {
-                    args.push(curr_arg.clone());
-                    curr_arg.clear();
+                    args.push(std::mem::take(&mut curr_arg));
                 }
                 chars.next();
             }
             '\'' => {
-                if is_double_quoted {
-                    curr_arg.push(c);
+                if in_double {
+                    curr_arg.push('\'');
                 } else {
-                    is_single_quoted = !is_single_quoted;
+                    in_single = !in_single;
                 }
                 chars.next();
             }
             '"' => {
-                if !is_double_quoted {
-                    if is_single_quoted {
-                        curr_arg.push(c);
-                    } else {
-                        is_double_quoted = true;
-                    }
+                if in_single {
+                    curr_arg.push('"');
                 } else {
-                    is_double_quoted = false;
+                    in_double = !in_double;
                 }
                 chars.next();
             }
-            '\\' if !(is_double_quoted || is_single_quoted) => {
+            '\\' if !in_single => {
                 chars.next();
-                if let Some(&next_char) = chars.peek() {
-                    curr_arg.push(next_char);
+                let Some(&next) = chars.peek() else {
+                    if in_double {
+                        return Err(ParseError::UnclosedDoubleQuote);
+                    }
+                    curr_arg.push('\\');
+                    continue;
+                };
+
+                if in_double {
+                    match next {
+                        '"' | '\\' | '$' | '`' => {
+                            curr_arg.push(next);
+                            chars.next();
+                        }
+                        _ => {
+                            curr_arg.push('\\');
+                            continue;
+                        }
+                    }
+                } else {
+                    curr_arg.push(next);
                     chars.next();
                 }
             }
@@ -59,17 +72,14 @@ pub fn parse_input(buff: &mut String) -> Result<Vec<String>, ParseError> {
         }
     }
 
-    if is_single_quoted {
+    if in_single {
         return Err(ParseError::UnclosedSingleQuote);
     }
-
-    if is_double_quoted {
+    if in_double {
         return Err(ParseError::UnclosedDoubleQuote);
     }
-
     if !curr_arg.is_empty() {
-        args.push(curr_arg.clone());
+        args.push(curr_arg);
     }
-
     Ok(args)
 }
