@@ -43,8 +43,14 @@ pub fn parse_input(buff: &mut String) -> Result<Vec<String>, ParseError> {
                 } else {
                     is_double_quoted = false;
                 }
-
                 chars.next();
+            }
+            '\\' if !(is_double_quoted || is_single_quoted) => {
+                chars.next();
+                if let Some(&next_char) = chars.peek() {
+                    curr_arg.push(next_char);
+                    chars.next();
+                }
             }
             _ => {
                 curr_arg.push(c);
