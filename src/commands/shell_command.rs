@@ -4,7 +4,7 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum ShellCommandError {
-    #[error("{0}: command not found")]
+    #[error("{0}: not found")]
     NotFoundError(String),
 
     #[error("{comm}: {reason}")]
