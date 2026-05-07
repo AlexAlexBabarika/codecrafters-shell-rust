@@ -14,13 +14,10 @@ fn execute_command(args: Vec<String>) {
     match &args[..] {
         [cmd, args @ .., op, path] if matches!(op.as_str(), ">" | "1>") => {
             let content = execute_external_command_capture_stdout(cmd, args);
-            match content {
-                Ok(output) => {
-                    if let Err(e) = write_to_file(path, &output) {
-                        println!("Error writing to file: {}", e);
-                    }
+            if let Ok(output) = content {
+                if let Err(e) = write_to_file(path, &output) {
+                    println!("Error writing to file: {}", e);
                 }
-                Err(e) => println!("Error executing command: {}", e),
             }
         }
         [cmd, tail @ ..] => {
