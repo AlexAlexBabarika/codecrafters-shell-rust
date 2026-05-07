@@ -28,14 +28,14 @@ fn execute_command(args: Vec<String>) {
     match &args[..] {
         [cmd, mid @ .., op, path] if matches!(op.as_str(), ">" | "1>") => {
             match execute_external_command_capture_stdout(cmd, mid) {
-                Ok(output) => write_to_file(path, &output.stdout)
+                Ok(output) => write_to_file(path, &output)
                     .unwrap_or_else(|e| println!("Error writing to file: {}", e)),
                 Err(e) => println!("{}", e),
             }
         }
         [cmd, mid @ .., op, path] if matches!(op.as_str(), "2>") => {
-            match execute_external_command_capture_stdout(cmd, mid) {
-                Ok(output) => write_to_file(path, &output.stderr)
+            match execute_external_command_capture_stderr(cmd, mid) {
+                Ok(output) => write_to_file(path, &output)
                     .unwrap_or_else(|e| println!("Error writing to file: {}", e)),
                 Err(e) => println!("{}", e),
             }
