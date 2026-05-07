@@ -1,4 +1,4 @@
-pub mod command_names;
+pub mod builtin_command_names;
 pub mod command_props;
 pub mod command_registry;
 pub mod command_result;

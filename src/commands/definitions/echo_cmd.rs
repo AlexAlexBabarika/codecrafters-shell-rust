@@ -1,4 +1,4 @@
-use crate::commands::command_names::CommandName;
+use crate::commands::builtin_command_names::BuiltinCommandName;
 use crate::commands::command_props::CommandProps;
 use crate::commands::command_result::CommandResult;
 use crate::commands::shell_command::{Execute, ShellCommandError};
@@ -12,7 +12,7 @@ impl ECHO {
     pub fn new() -> Self {
         ECHO {
             props: CommandProps {
-                name: CommandName::Echo,
+                name: BuiltinCommandName::Echo,
                 max_args: 64,
             },
         }

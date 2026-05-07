@@ -1,4 +1,4 @@
-use crate::commands::command_names::CommandName;
+use crate::commands::builtin_command_names::BuiltinCommandName;
 use crate::commands::command_props::CommandProps;
 use crate::commands::command_result::CommandResult;
 use crate::commands::shell_command::{Execute, Fail, ShellCommandError};
@@ -13,7 +13,7 @@ impl CD {
     pub fn new() -> Self {
         CD {
             props: CommandProps {
-                name: CommandName::Cd,
+                name: BuiltinCommandName::Cd,
                 max_args: 1,
             },
         }

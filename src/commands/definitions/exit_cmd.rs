@@ -1,4 +1,4 @@
-use crate::commands::command_names::CommandName;
+use crate::commands::builtin_command_names::BuiltinCommandName;
 use crate::commands::command_props::CommandProps;
 use crate::commands::command_result::CommandResult;
 use crate::commands::shell_command::Execute;
@@ -13,7 +13,7 @@ impl EXIT {
     pub fn new() -> Self {
         EXIT {
             props: CommandProps {
-                name: CommandName::Exit,
+                name: BuiltinCommandName::Exit,
                 max_args: 0,
             },
         }

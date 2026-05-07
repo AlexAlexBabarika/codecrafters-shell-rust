@@ -2,7 +2,7 @@ use std::fmt;
 use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum CommandName {
+pub enum BuiltinCommandName {
     Echo,
     Type,
     Exit,
@@ -10,7 +10,7 @@ pub enum CommandName {
     Cd,
 }
 
-impl CommandName {
+impl BuiltinCommandName {
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Echo => "echo",
@@ -22,7 +22,17 @@ impl CommandName {
     }
 }
 
-impl fmt::Display for CommandName {
+pub fn get_builtin_command_names() -> Vec<&'static str> {
+    vec![
+        BuiltinCommandName::Echo.as_str(),
+        BuiltinCommandName::Type.as_str(),
+        BuiltinCommandName::Exit.as_str(),
+        BuiltinCommandName::Pwd.as_str(),
+        BuiltinCommandName::Cd.as_str(),
+    ]
+}
+
+impl fmt::Display for BuiltinCommandName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.as_str())
     }
@@ -31,7 +41,7 @@ impl fmt::Display for CommandName {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UnknownCommandName;
 
-impl FromStr for CommandName {
+impl FromStr for BuiltinCommandName {
     type Err = UnknownCommandName;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {

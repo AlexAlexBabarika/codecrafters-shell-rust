@@ -1,6 +1,6 @@
-use crate::commands::command_names::CommandName;
+use crate::commands::builtin_command_names::BuiltinCommandName;
 
 pub struct CommandProps {
-    pub name: CommandName,
+    pub name: BuiltinCommandName,
     pub max_args: usize,
 }

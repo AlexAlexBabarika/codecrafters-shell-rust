@@ -1,4 +1,4 @@
-use crate::commands::command_names::CommandName;
+use crate::commands::builtin_command_names::BuiltinCommandName;
 use crate::commands::command_result::CommandResult;
 use thiserror::Error;
 
@@ -9,13 +9,22 @@ pub enum ShellCommandError {
 
     #[error("{comm}: {reason}")]
     #[allow(dead_code)]
-    FailedToExecute { comm: CommandName, reason: String },
+    FailedToExecute {
+        comm: BuiltinCommandName,
+        reason: String,
+    },
 
     #[error("{comm}: too many arguments have been provided. The limit is {max_args} arguments")]
-    TooManyArgs { comm: CommandName, max_args: usize },
+    TooManyArgs {
+        comm: BuiltinCommandName,
+        max_args: usize,
+    },
 
     #[error("{comm}: no arguments have been provided. You can provide {max_args} argument(s)")]
-    NoArgs { comm: CommandName, max_args: usize },
+    NoArgs {
+        comm: BuiltinCommandName,
+        max_args: usize,
+    },
 
     #[error("{0}")]
     ExternalCommandError(String),

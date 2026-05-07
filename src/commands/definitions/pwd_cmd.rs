@@ -1,4 +1,4 @@
-use crate::commands::command_names::CommandName;
+use crate::commands::builtin_command_names::BuiltinCommandName;
 use crate::commands::command_props::CommandProps;
 use crate::commands::command_result::CommandResult;
 use crate::commands::shell_command::{Execute, Fail, ShellCommandError};
@@ -12,7 +12,7 @@ impl PWD {
     pub fn new() -> Self {
         PWD {
             props: CommandProps {
-                name: CommandName::Pwd,
+                name: BuiltinCommandName::Pwd,
                 max_args: 0,
             },
         }
