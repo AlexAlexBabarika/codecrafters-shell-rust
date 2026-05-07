@@ -2,7 +2,7 @@ use parser::parse::parse_input;
 
 use crate::util::execute_external_command::*;
 use crate::util::is_shell_builtin::is_shell_builtin;
-use crate::util::write_to_file::{write_to_file, append_to_file};
+use crate::util::write_to_file::{append_to_file, write_to_file};
 
 use std::io::{Write, stdin, stdout};
 

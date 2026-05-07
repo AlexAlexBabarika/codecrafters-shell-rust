@@ -8,7 +8,7 @@ pub fn write_to_file(path: &str, content: &str) -> std::io::Result<()> {
 }
 
 pub fn append_to_file(path: &str, content: &str) -> std::io::Result<()> {
-        match File::options().append(true).open(path) {
+    match File::options().append(true).open(path) {
         Ok(mut file) => {
             file.write_all(content.as_bytes())?;
             Ok(())
@@ -18,3 +18,4 @@ pub fn append_to_file(path: &str, content: &str) -> std::io::Result<()> {
             _ => Err(e),
         },
     }
+}
