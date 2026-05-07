@@ -2,7 +2,7 @@ use parser::parse::parse_input;
 
 use crate::util::execute_external_command::*;
 use crate::util::is_shell_builtin::is_shell_builtin;
-use crate::util::write_to_file::write_to_file;
+use crate::util::write_to_file::{write_to_file, append_to_file};
 
 use std::io::{Write, stdin, stdout};
 
@@ -36,6 +36,20 @@ fn execute_command(args: Vec<String>) {
         [cmd, mid @ .., op, path] if matches!(op.as_str(), "2>") => {
             match execute_external_command_capture_stderr(cmd, mid) {
                 Ok(output) => write_to_file(path, &output)
+                    .unwrap_or_else(|e| println!("Error writing to file: {}", e)),
+                Err(e) => println!("{}", e),
+            }
+        }
+        [cmd, mid @ .., op, path] if matches!(op.as_str(), ">>" | "1>>") => {
+            match execute_external_command_capture_stdout(cmd, mid) {
+                Ok(output) => append_to_file(path, &output)
+                    .unwrap_or_else(|e| println!("Error writing to file: {}", e)),
+                Err(e) => println!("{}", e),
+            }
+        }
+        [cmd, mid @ .., op, path] if matches!(op.as_str(), "2>>") => {
+            match execute_external_command_capture_stderr(cmd, mid) {
+                Ok(output) => append_to_file(path, &output)
                     .unwrap_or_else(|e| println!("Error writing to file: {}", e)),
                 Err(e) => println!("{}", e),
             }
