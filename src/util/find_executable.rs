@@ -3,7 +3,7 @@ use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::path;
 
-fn check_if_executable(exe_dir: &str) -> bool {
+pub fn check_if_executable(exe_dir: &str) -> bool {
     let path = path::Path::new(exe_dir);
     if path.is_dir() {
         return false;

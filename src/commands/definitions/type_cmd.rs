@@ -24,7 +24,7 @@ impl Execute for TYPE {
     fn execute(&self, args: &[String]) -> Result<CommandResult, ShellCommandError> {
         check_arguments_length(args, &self.props)?;
 
-        if crate::util::is_shell_builtin::is_shell_builtin(&args[0]).0 {
+        if let Some(_cmd) = crate::util::is_shell_builtin::is_shell_builtin(&args[0]) {
             return Ok(CommandResult {
                 message: Some(format!("{} is a shell builtin", args[0])),
             });

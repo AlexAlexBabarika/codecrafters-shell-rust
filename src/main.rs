@@ -1,13 +1,45 @@
 use parser::parse::parse_input;
 
-use crate::util::execute_external_command::execute_external_command;
+use crate::util::execute_external_command::{execute_external_command, execute_external_command_capture_stdout};
 use crate::util::is_shell_builtin::is_shell_builtin;
+use crate::util::write_to_file::write_to_file;
 
 use std::io::{Write, stdin, stdout};
 
 mod commands;
 mod parser;
 mod util;
+
+fn execute_command(args: Vec<String>) {
+    match &args[..] {
+        [cmd, args @ .., op, path] if matches!(op.as_str(), ">" | "1>") => {
+            let content = execute_external_command_capture_stdout(cmd, args);
+            match content {
+                Ok(output) => {
+                    if let Err(e) = write_to_file(path, &output) {
+                        println!("Error writing to file: {}", e);
+                    }
+                }
+                Err(e) => println!("{}", e),
+            }
+        }
+        [cmd, tail @ ..] => {
+            if let Some(builtin) = is_shell_builtin(cmd) {
+                match builtin.execute(tail) {
+                    Ok(result) => {
+                        if let Some(msg) = result.message {
+                            println!("{}", msg);
+                        }
+                    }
+                    Err(e) => println!("{}", e),
+                }
+            } else {
+                execute_external_command(cmd, tail).map_err(|e| println!("{}", e)).unwrap();
+            }
+        }
+        [] => {}
+    }
+}
 
 fn main() {
     let mut input: String = String::new();
@@ -26,18 +58,7 @@ fn main() {
             }
         };
 
-        if let (true, Some(cmd)) = is_shell_builtin(&args[0]) {
-            match cmd.execute(&args[1..]) {
-                Ok(result) => {
-                    if let Some(msg) = result.message {
-                        println!("{}", msg);
-                    }
-                }
-                Err(e) => println!("{}", e),
-            }
-        } else {
-            execute_external_command(&args[0], &args[1..]).unwrap_or_else(|e| println!("{}", e));
-        }
+        execute_command(args);
 
         input.clear();
     }

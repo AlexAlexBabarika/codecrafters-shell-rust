@@ -16,6 +16,9 @@ pub enum ShellCommandError {
 
     #[error("{comm}: no arguments have been provided. You can provide {max_args} argument(s)")]
     NoArgs { comm: CommandName, max_args: usize },
+
+    #[error("{0}")]
+    ExternalCommandError(String),
 }
 
 pub trait Execute {

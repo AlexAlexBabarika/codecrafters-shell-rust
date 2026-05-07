@@ -81,5 +81,6 @@ pub fn parse_input(buff: &mut String) -> Result<Vec<String>, ParseError> {
     if !curr_arg.is_empty() {
         args.push(curr_arg);
     }
+
     Ok(args)
 }
