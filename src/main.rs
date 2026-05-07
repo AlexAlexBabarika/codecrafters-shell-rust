@@ -28,9 +28,7 @@ fn run_builtin_or_external(cmd: &str, tail: &[String]) {
             }
             Err(e) => println!("{}", e),
         },
-        None => execute_external_command(cmd, tail).unwrap_or_else(|e| {
-            println!("Error executing command: {}", e);
-        }),
+        None => execute_external_command(cmd, tail).unwrap_or_else(|e| println!("{}", e)),
     }
 }
 
