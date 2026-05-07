@@ -20,7 +20,7 @@ fn execute_command(args: Vec<String>) {
                         println!("Error writing to file: {}", e);
                     }
                 }
-                Err(e) => println!("{}", e),
+                Err(e) => {},
             }
         }
         [cmd, tail @ ..] => {
