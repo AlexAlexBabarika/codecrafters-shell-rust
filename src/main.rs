@@ -1,22 +1,14 @@
 use parser::parse::parse_input;
 
-use crate::util::execute_external_command::{execute_external_command, execute_external_command_capture_stdout};
+use crate::util::execute_external_command::*;
 use crate::util::is_shell_builtin::is_shell_builtin;
 use crate::util::write_to_file::write_to_file;
 
-use std::io::{stdin, stdout, Write};
+use std::io::{Write, stdin, stdout};
 
 mod commands;
 mod parser;
 mod util;
-
-fn run_redirect(cmd: &str, mid: &[String], path: &str) {
-    match execute_external_command_capture_stdout(cmd, mid) {
-        Ok(output) => write_to_file(path, &output)
-            .unwrap_or_else(|e| println!("Error writing to file: {}", e)),
-        Err(e) => println!("{}", e),
-    }
-}
 
 fn run_builtin_or_external(cmd: &str, tail: &[String]) {
     match is_shell_builtin(cmd) {
@@ -35,7 +27,18 @@ fn run_builtin_or_external(cmd: &str, tail: &[String]) {
 fn execute_command(args: Vec<String>) {
     match &args[..] {
         [cmd, mid @ .., op, path] if matches!(op.as_str(), ">" | "1>") => {
-            run_redirect(cmd, mid, path);
+            match execute_external_command_capture_stdout(cmd, mid) {
+                Ok(output) => write_to_file(path, &output.stdout)
+                    .unwrap_or_else(|e| println!("Error writing to file: {}", e)),
+                Err(e) => println!("{}", e),
+            }
+        }
+        [cmd, mid @ .., op, path] if matches!(op.as_str(), "2>") => {
+            match execute_external_command_capture_stdout(cmd, mid) {
+                Ok(output) => write_to_file(path, &output.stderr)
+                    .unwrap_or_else(|e| println!("Error writing to file: {}", e)),
+                Err(e) => println!("{}", e),
+            }
         }
         [cmd, tail @ ..] => run_builtin_or_external(cmd, tail),
         [] => {}
