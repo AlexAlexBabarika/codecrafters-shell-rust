@@ -3,3 +3,84 @@ usage: ls [-@ABCFGHILOPRSTUWXabcdefghiklmnopqrstuvwxy1%,] [--color=when] [-D for
 aboba
 ls: invalid option -- z
 usage: ls [-@ABCFGHILOPRSTUWXabcdefghiklmnopqrstuvwxy1%,] [--color=when] [-D format] [file ...]
+
+Critical: tab completion (`shell_helper.rs`)
+
+- **`complete` calls `get_path_executables()` on every completion request.** That walks **every** `PATH` directory and `stat`s files — very expensive per keypress.
+- It also rebuilds **`get_builtin_command_names()`** and merges vectors each time.
+
+**Suggestions:** Cache a sorted list of completion candidates (builtins + PATH names) in something like `std::sync::OnceLock`/`LazyLock`/`Mutex`, refresh on a timer or when the user presses Tab only (not every `complete` call if rustyline triggers often), or invalidate when `PATH` changes. Consider `rustyline`’s own caching or a `Vec`/`radix_trie` you already depend on for prefix search instead of scanning full lists each time.
+
+---
+
+### High: per-line allocation in `main.rs`
+
+- **`parse_input(&mut line.to_string())`** forces a **new `String`** every line even though you already have `line: String` from `readline`. That duplicates memory and work.
+
+**Suggestions:** Change the parser API to accept **`&str`** (or `&mut String` you reuse without `to_string()`), or pass ownership of `line` into parse with `parse_input(line)` once, then recycle a single buffer across iterations.
+
+---
+
+### High: `type` builtin (`type_cmd.rs`)
+
+- **`is_shell_builtin(&args[0])` builds a `Box<dyn Execute>`** only to see if the name is builtin. That allocates when you only need a **boolean** or an enum.
+
+**Suggestions:** Use **`BuiltinCommandName::from_str`** (or a small `fn is_builtin_name(s: &str) -> bool`) before any `Box` allocation. Reserve **`find_executable`** for the “on PATH” branch only.
+
+---
+
+### Medium: builtin resolution (`command_registry.rs` + `is_shell_builtin.rs`)
+
+- Every successful builtin lookup does **`Box::new(…::new())`** for a fresh struct (`ECHO`, `TYPE`, etc.). Stateless builtins don’t need a new allocation per invocation.
+
+**Suggestions:** **Singleton / cached `Box`** per builtin (e.g. `static` + `LazyLock`), or `&dyn Execute` to static instances, while keeping `Box<dyn>` only where you need trait objects for a **uniform registry**.
+
+---
+
+### Medium: parser (`parse.rs`)
+
+- **`while matches!(buff.chars().next_back(), …)`** can repeatedly walk UTF-8 at the tail; for long lines it’s extra work.
+
+**Suggestions:** Prefer **`trim_end_matches(['\r','\n'])`** semantics in one pass, or trim by byte if input is known ASCII-only (only if invariants allow it).
+
+- Using **`peekable` char iterator** is fine for clarity; a single `&[u8]` / manual index loop can be faster for shell-like ASCII-heavy input, at the cost of complexity and correctness for Unicode.
+
+---
+
+### Medium: `find_executable.rs`
+
+- **`find_executable`** scans `PATH` and **`stat`s** until first hit — normal for shells. For workloads that call it repeatedly (e.g. `type` or completion), consider a **small LRU cache** of `(name → path)` with invalidation when `PATH` or mtimes change (advanced).
+
+- Returning **`Option<String>`** always allocates the path string; **`PathBuf`** or **`Cow<str>`** can avoid copies in some call sites (micro-optimization).
+
+---
+
+### Low: `echo_cmd.rs`
+
+- **`format!("{}", args.join(" "))`** duplicates work; **`args.join(" ")`** is enough.
+
+---
+
+### Low: `cd_cmd.rs`
+
+- **`contains('~')` / `contains("..")` / `contains('.')` on whole segment** is a coarse heuristic and may do extra work for long segments.
+
+**Suggestions:** Prefer `Path` operations (`components`, `push`, `pop`, normalize `~` once via `home_dir()`). Fewer string scans and clearer semantics.
+
+---
+
+### Low: redirect / capture paths (`execute.rs` + `execute_external_command.rs`)
+
+- **`String::from_utf8(output.stdout)`** allocates a full `String`; sometimes **`from_utf8` + lossy** or writing bytes to a file without UTF-8 validation is acceptable for binary-ish output (depends on course requirements).
+
+- **`execute_command`** pattern could use a single match on the redirect operator to avoid repeated **`matches!(op.as_str(), …)`** — small readability/match efficiency win, not huge.
+
+---
+
+### Profiling note
+
+This shell is usually **I/O- and syscall-bound** (`readline`, `fork`/`exec`, disk `stat`). The **completion PATH scan** and **per-line `to_string` + parsing** are the few places where CPU can dominate. Use **`cargo build --release`** for measurements; **`perf`/` Instruments`** if you need proof.
+
+---
+
+**Suggested priority order:** (1) completion caching, (2) avoid `Box` in `type`’s builtin check, (3) reuse input buffer in `main`, (4) optional builtin instance reuse, (5) micro-cleanups (`echo`, parser trim, cd path logic).
