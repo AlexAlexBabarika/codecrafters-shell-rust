@@ -1,38 +1,53 @@
+use std::collections::HashSet;
 use std::env;
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
-use std::path;
+use std::path::Path;
 
-pub fn check_if_executable(exe_dir: &str) -> bool {
-    let path = path::Path::new(exe_dir);
-    if path.is_dir() {
+pub fn check_if_executable(path: &str) -> bool {
+    is_executable_file(Path::new(path))
+}
+
+fn is_executable_file(path: &Path) -> bool {
+    let Ok(meta) = fs::metadata(path) else {
+        return false;
+    };
+    if meta.is_dir() {
         return false;
     }
-
-    if let Ok(metadata) = fs::metadata(path) {
-        let permissions = metadata.permissions();
-        if permissions.mode() & 0o100 != 0 {
-            return true;
-        }
-    }
-    false
+    meta.permissions().mode() & 0o100 != 0
 }
 
 pub fn find_executable(exe_name: &str) -> Option<String> {
-    env::var_os("PATH").and_then(|paths| {
-        env::split_paths(&paths)
-            .filter_map(|dir| {
-                let full_path = dir.join(exe_name);
-                if let Some(string_path) = full_path.to_str() {
-                    if check_if_executable(string_path) {
-                        Some(string_path.to_string())
-                    } else {
-                        None
-                    }
-                } else {
-                    None
-                }
-            })
-            .next()
+    let paths = env::var_os("PATH")?;
+    env::split_paths(&paths).find_map(|dir| {
+        let full_path = dir.join(exe_name);
+        full_path
+            .to_str()
+            .filter(|p| check_if_executable(p))
+            .map(str::to_string)
     })
+}
+
+pub fn get_path_executables() -> Result<Vec<String>, env::VarError> {
+    let path_var = env::var("PATH")?;
+    let mut seen = HashSet::new();
+
+    for dir in env::split_paths(&path_var) {
+        let Ok(read_dir) = fs::read_dir(&dir) else {
+            continue;
+        };
+        for entry in read_dir.filter_map(Result::ok) {
+            if !is_executable_file(&entry.path()) {
+                continue;
+            }
+            if let Some(name) = entry.file_name().to_str() {
+                seen.insert(name.to_string());
+            }
+        }
+    }
+
+    let mut names: Vec<String> = seen.into_iter().collect();
+    names.sort();
+    Ok(names)
 }

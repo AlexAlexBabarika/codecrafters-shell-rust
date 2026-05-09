@@ -22,13 +22,13 @@ impl BuiltinCommandName {
     }
 }
 
-pub fn get_builtin_command_names() -> Vec<&'static str> {
+pub fn get_builtin_command_names() -> Vec<String> {
     vec![
-        BuiltinCommandName::Echo.as_str(),
-        BuiltinCommandName::Type.as_str(),
-        BuiltinCommandName::Exit.as_str(),
-        BuiltinCommandName::Pwd.as_str(),
-        BuiltinCommandName::Cd.as_str(),
+        BuiltinCommandName::Echo.as_str().to_string(),
+        BuiltinCommandName::Type.as_str().to_string(),
+        BuiltinCommandName::Exit.as_str().to_string(),
+        BuiltinCommandName::Pwd.as_str().to_string(),
+        BuiltinCommandName::Cd.as_str().to_string(),
     ]
 }
 
