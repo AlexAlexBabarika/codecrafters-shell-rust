@@ -1,8 +1,6 @@
 use parser::parse::parse_input;
 use shell::execute::execute_command;
 use shell::shell_helper::ShellHelper;
-
-use rustyline::history::DefaultHistory;
 use rustyline::{Editor, Result};
 
 mod commands;
@@ -11,20 +9,13 @@ mod shell;
 mod util;
 
 fn main() -> Result<()> {
-    // let mut input = String::new();
-    let mut rl = Editor::<ShellHelper, DefaultHistory>::new()?;
+    let config = rustyline::Config::builder()
+        .completion_type(rustyline::CompletionType::List)
+        .build();
+    let mut rl = Editor::with_config(config)?;
     rl.set_helper(Some(ShellHelper));
 
     loop {
-        // print!("$ ");
-        // let _ = stdout().flush().unwrap();
-        // stdin().read_line(&mut input).unwrap();
-
-        // match parse_input(&mut input) {
-        //     Ok(args) => execute_command(args),
-        //     Err(e) => println!("{}", e),
-        // }
-
         match rl.readline("$ ") {
             Ok(line) => {
                 let line = line.trim();

@@ -5,6 +5,7 @@ use crate::commands::builtin_command_names::get_builtin_command_names;
 use crate::util::find_executable::get_path_executables;
 
 use rustyline::completion::{Completer, Pair};
+// use rustyline::error::FilenameCompleter;
 use rustyline::highlight::Highlighter;
 use rustyline::hint::Hinter;
 use rustyline::validate::Validator;
