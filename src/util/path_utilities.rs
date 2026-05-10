@@ -51,3 +51,17 @@ pub fn get_path_executables() -> Result<Vec<String>, env::VarError> {
     names.sort();
     Ok(names)
 }
+
+pub fn get_current_directory_files() -> Result<Vec<String>, std::io::Error> {
+    let current_dir = env::current_dir()?;
+    let mut files = Vec::new();
+
+    for entry in fs::read_dir(current_dir)? {
+        let entry = entry?;
+        if let Some(name) = entry.file_name().to_str() {
+            files.push(name.to_string());
+        }
+    }
+
+    Ok(files)
+}

@@ -30,7 +30,7 @@ impl Execute for TYPE {
             });
         }
 
-        if let Some(exe) = crate::util::find_executable::find_executable(&args[0]) {
+        if let Some(exe) = crate::util::path_utilities::find_executable(&args[0]) {
             return Ok(CommandResult { message: Some(exe) });
         }
 

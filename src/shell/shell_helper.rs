@@ -2,14 +2,14 @@ use std::env;
 use std::sync::{Arc, Mutex};
 
 use crate::commands::builtin_command_names::get_builtin_command_names;
-use crate::util::find_executable::get_path_executables;
+use crate::util::path_utilities::{get_current_directory_files, get_path_executables};
 
 use rustyline::completion::{Completer, Pair};
-// use rustyline::error::FilenameCompleter;
 use rustyline::highlight::Highlighter;
 use rustyline::hint::Hinter;
 use rustyline::validate::Validator;
 use rustyline::{Context, Helper, Result};
+use std::path::PathBuf;
 
 struct CompletionNamesCache {
     path_env: String,
@@ -45,6 +45,35 @@ fn completion_names_cached() -> Arc<Vec<String>> {
     names
 }
 
+struct CurrentDirFilesCache {
+    current_dir: PathBuf,
+    names: Arc<Vec<String>>,
+}
+
+static CURRENT_DIR_FILES_CACHE: Mutex<Option<CurrentDirFilesCache>> = Mutex::new(None);
+
+fn current_dir_files_cached() -> Arc<Vec<String>> {
+    let current_dir = env::current_dir().unwrap_or_default();
+
+    {
+        let guard = CURRENT_DIR_FILES_CACHE.lock().unwrap();
+        if let Some(cache) = guard.as_ref() {
+            if cache.current_dir == current_dir {
+                return Arc::clone(&cache.names);
+            }
+        }
+    }
+
+    let names = Arc::new(get_current_directory_files().unwrap_or_default());
+    let mut guard = CURRENT_DIR_FILES_CACHE.lock().unwrap();
+    *guard = Some(CurrentDirFilesCache {
+        current_dir: current_dir,
+        names: Arc::clone(&names),
+    });
+
+    names
+}
+
 pub struct ShellHelper;
 
 impl Completer for ShellHelper {
@@ -52,10 +81,12 @@ impl Completer for ShellHelper {
 
     fn complete(&self, line: &str, pos: usize, _ctx: &Context<'_>) -> Result<(usize, Vec<Pair>)> {
         let prefix = &line[..pos];
-        let candidates = completion_names_cached();
 
-        let matches: Vec<Pair> = candidates
-            .iter()
+        let completion_names = completion_names_cached();
+        let current_dir_files = current_dir_files_cached();
+        let merged = completion_names.iter().chain(current_dir_files.iter());
+
+        let matches: Vec<Pair> = merged
             .filter(|b| b.starts_with(prefix))
             .map(|b| Pair {
                 display: b.clone(),

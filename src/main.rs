@@ -1,7 +1,7 @@
 use parser::parse::parse_input;
+use rustyline::{Editor, Result};
 use shell::execute::execute_command;
 use shell::shell_helper::ShellHelper;
-use rustyline::{Editor, Result};
 
 mod commands;
 mod parser;
