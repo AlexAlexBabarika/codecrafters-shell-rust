@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::env;
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub fn check_if_executable(path: &str) -> bool {
     is_executable_file(Path::new(path))
@@ -64,4 +64,33 @@ pub fn get_current_directory_files() -> Result<Vec<String>, std::io::Error> {
     }
 
     Ok(files)
+}
+
+pub fn get_matches_in_directory(
+    dir: &str,
+    file_prefix: &str,
+) -> Result<std::sync::Arc<Vec<String>>, std::io::Error> {
+    let dir_path = if dir.starts_with('/') {
+        PathBuf::from(dir)
+    } else {
+        env::current_dir()?.join(dir)
+    };
+
+    let include_hidden = file_prefix.starts_with('.');
+    let mut files = Vec::new();
+    if let Ok(rd) = fs::read_dir(&dir_path) {
+        for entry in rd.filter_map(Result::ok) {
+            let Some(name) = entry.file_name().to_str().map(str::to_string) else {
+                continue;
+            };
+            if !name.starts_with(file_prefix) {
+                continue;
+            }
+            if !include_hidden && name.starts_with('.') {
+                continue;
+            }
+            files.push(format!("{}{}", dir, name));
+        }
+    }
+    Ok(std::sync::Arc::new(files))
 }
