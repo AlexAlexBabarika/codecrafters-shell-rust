@@ -80,21 +80,31 @@ impl Completer for ShellHelper {
     type Candidate = Pair;
 
     fn complete(&self, line: &str, pos: usize, _ctx: &Context<'_>) -> Result<(usize, Vec<Pair>)> {
-        let prefix = &line[..pos];
+        let start = line[..pos]
+            .rfind(char::is_whitespace)
+            .map(|i| i + 1)
+            .unwrap_or(0);
+        let prefix = &line[start..pos];
 
-        let completion_names = completion_names_cached();
-        let current_dir_files = current_dir_files_cached();
-        let merged = completion_names.iter().chain(current_dir_files.iter());
+        let is_first_word = line[..start].trim().is_empty();
+        let names = if is_first_word {
+            completion_names_cached()
+        } else {
+            current_dir_files_cached()
+        };
 
-        let matches: Vec<Pair> = merged
+        let include_hidden = prefix.starts_with('.');
+        let matches: Vec<Pair> = names
+            .iter()
             .filter(|b| b.starts_with(prefix))
+            .filter(|b| include_hidden || !b.starts_with('.'))
             .map(|b| Pair {
                 display: b.clone(),
                 replacement: format!("{} ", b),
             })
             .collect();
 
-        Ok((0, matches))
+        Ok((start, matches))
     }
 }
 
