@@ -31,7 +31,7 @@ impl Completer for ShellHelper {
         };
 
         let include_hidden = prefix.starts_with('.');
-        let matches: Vec<Pair> = names
+        let mut matches: Vec<Pair> = names
             .iter()
             .filter(|b| b.starts_with(prefix))
             .filter(|b| include_hidden || !b.starts_with('.'))
@@ -40,6 +40,7 @@ impl Completer for ShellHelper {
                 replacement: format!("{}", b),
             })
             .collect();
+        matches.sort_by(|a, b| a.display.cmp(&b.display));
 
         Ok((start, matches))
     }
