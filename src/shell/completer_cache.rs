@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 use crate::commands::builtin_command_names::get_builtin_command_names;
-use crate::util::path_utilities::{get_current_directory_files, get_path_executables};
+use crate::util::path_utilities::{get_current_directory_entries, get_path_executables};
 
 struct CompletionNamesCache {
     path_env: String,
@@ -44,13 +44,13 @@ struct CurrentDirFilesCache {
     names: Arc<Vec<String>>,
 }
 
-static CURRENT_DIR_FILES_CACHE: Mutex<Option<CurrentDirFilesCache>> = Mutex::new(None);
+static CURRENT_DIR_ENTRIES_CACHE: Mutex<Option<CurrentDirFilesCache>> = Mutex::new(None);
 
-pub fn current_dir_files_cached() -> Arc<Vec<String>> {
+pub fn current_dir_entries_cached() -> Arc<Vec<String>> {
     let current_dir = env::current_dir().unwrap_or_default();
 
     {
-        let guard = CURRENT_DIR_FILES_CACHE.lock().unwrap();
+        let guard = CURRENT_DIR_ENTRIES_CACHE.lock().unwrap();
         if let Some(cache) = guard.as_ref() {
             if cache.current_dir == current_dir {
                 return Arc::clone(&cache.names);
@@ -58,8 +58,8 @@ pub fn current_dir_files_cached() -> Arc<Vec<String>> {
         }
     }
 
-    let names = Arc::new(get_current_directory_files().unwrap_or_default());
-    let mut guard = CURRENT_DIR_FILES_CACHE.lock().unwrap();
+    let names = Arc::new(get_current_directory_entries().unwrap_or_default());
+    let mut guard = CURRENT_DIR_ENTRIES_CACHE.lock().unwrap();
     *guard = Some(CurrentDirFilesCache {
         current_dir: current_dir,
         names: Arc::clone(&names),

@@ -52,21 +52,25 @@ pub fn get_path_executables() -> Result<Vec<String>, env::VarError> {
     Ok(names)
 }
 
-pub fn get_current_directory_files() -> Result<Vec<String>, std::io::Error> {
+pub fn get_current_directory_entries() -> Result<Vec<String>, std::io::Error> {
     let current_dir = env::current_dir()?;
-    let mut files = Vec::new();
+    let mut entries = Vec::new();
 
     for entry in fs::read_dir(current_dir)? {
         let entry = entry?;
         if let Some(name) = entry.file_name().to_str() {
-            files.push(name.to_string());
+            if entry.path().is_file() {
+                entries.push(format!("{} ", name));
+            } else {
+                entries.push(format!("{}/", name));
+            }
         }
     }
 
-    Ok(files)
+    Ok(entries)
 }
 
-pub fn get_matches_in_directory(
+pub fn get_matching_entries_in_directory(
     dir: &str,
     file_prefix: &str,
 ) -> Result<std::sync::Arc<Vec<String>>, std::io::Error> {
@@ -77,20 +81,22 @@ pub fn get_matches_in_directory(
     };
 
     let include_hidden = file_prefix.starts_with('.');
-    let mut files = Vec::new();
+    let mut entries = Vec::new();
     if let Ok(rd) = fs::read_dir(&dir_path) {
         for entry in rd.filter_map(Result::ok) {
             let Some(name) = entry.file_name().to_str().map(str::to_string) else {
                 continue;
             };
-            if !name.starts_with(file_prefix) {
+            if !name.starts_with(file_prefix) || (!include_hidden && name.starts_with('.')) {
                 continue;
             }
-            if !include_hidden && name.starts_with('.') {
-                continue;
+
+            if entry.path().is_file() {
+                entries.push(format!("{}{}", dir, name));
+            } else {
+                entries.push(format!("{}{}/", dir, name));
             }
-            files.push(format!("{}{}", dir, name));
         }
     }
-    Ok(std::sync::Arc::new(files))
+    Ok(std::sync::Arc::new(entries))
 }

@@ -1,5 +1,5 @@
-use crate::shell::completer_cache::{completion_names_cached, current_dir_files_cached};
-use crate::util::path_utilities::get_matches_in_directory;
+use crate::shell::completer_cache::{completion_names_cached, current_dir_entries_cached};
+use crate::util::path_utilities::get_matching_entries_in_directory;
 use rustyline::completion::{Completer, Pair};
 use rustyline::highlight::Highlighter;
 use rustyline::hint::Hinter;
@@ -24,9 +24,9 @@ impl Completer for ShellHelper {
             if prefix.contains('/') {
                 let split = prefix.rfind('/').unwrap() + 1;
                 let (dir_part, file_prefix) = prefix.split_at(split);
-                get_matches_in_directory(dir_part, file_prefix).unwrap_or_default()
+                get_matching_entries_in_directory(dir_part, file_prefix).unwrap_or_default()
             } else {
-                current_dir_files_cached()
+                current_dir_entries_cached()
             }
         };
 
@@ -37,7 +37,7 @@ impl Completer for ShellHelper {
             .filter(|b| include_hidden || !b.starts_with('.'))
             .map(|b| Pair {
                 display: b.clone(),
-                replacement: format!("{} ", b),
+                replacement: format!("{}", b),
             })
             .collect();
 
