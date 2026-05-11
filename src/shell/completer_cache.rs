@@ -24,7 +24,7 @@ pub fn completion_names_cached() -> Arc<Vec<String>> {
         }
     }
 
-    let mut merged = get_builtin_command_names();
+    let mut merged = get_builtin_command_names(true);
     merged.extend(get_path_executables().unwrap_or_default());
     merged.sort();
     merged.dedup();

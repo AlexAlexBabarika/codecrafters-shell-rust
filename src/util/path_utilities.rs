@@ -92,7 +92,7 @@ pub fn get_matching_entries_in_directory(
             }
 
             if entry.path().is_file() {
-                entries.push(format!("{}{}", dir, name));
+                entries.push(format!("{}{} ", dir, name));
             } else {
                 entries.push(format!("{}{}/", dir, name));
             }

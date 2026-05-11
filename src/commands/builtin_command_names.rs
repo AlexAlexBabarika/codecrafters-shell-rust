@@ -22,14 +22,24 @@ impl BuiltinCommandName {
     }
 }
 
-pub fn get_builtin_command_names() -> Vec<String> {
-    vec![
-        BuiltinCommandName::Echo.as_str().to_string(),
-        BuiltinCommandName::Type.as_str().to_string(),
-        BuiltinCommandName::Exit.as_str().to_string(),
-        BuiltinCommandName::Pwd.as_str().to_string(),
-        BuiltinCommandName::Cd.as_str().to_string(),
-    ]
+pub fn get_builtin_command_names(add_trailing_whitespace: bool) -> Vec<String> {
+    if add_trailing_whitespace {
+        vec![
+            format!("{} ", BuiltinCommandName::Echo.as_str()),
+            format!("{} ", BuiltinCommandName::Type.as_str()),
+            format!("{} ", BuiltinCommandName::Exit.as_str()),
+            format!("{} ", BuiltinCommandName::Pwd.as_str()),
+            format!("{} ", BuiltinCommandName::Cd.as_str()),
+        ]
+    } else {
+        vec![
+            BuiltinCommandName::Echo.as_str().to_string(),
+            BuiltinCommandName::Type.as_str().to_string(),
+            BuiltinCommandName::Exit.as_str().to_string(),
+            BuiltinCommandName::Pwd.as_str().to_string(),
+            BuiltinCommandName::Cd.as_str().to_string(),
+        ]
+    }
 }
 
 impl fmt::Display for BuiltinCommandName {
