@@ -4,6 +4,7 @@ use shell::execute::execute_command;
 use shell::shell_helper::ShellHelper;
 
 mod commands;
+mod completion_registry;
 mod parser;
 mod shell;
 mod util;

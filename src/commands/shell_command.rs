@@ -26,6 +26,12 @@ pub enum ShellCommandError {
         max_args: usize,
     },
 
+    #[error("{comm}: invalid arguments provided. {message}")]
+    InvalidArguments {
+        comm: BuiltinCommandName,
+        message: String,
+    },
+
     #[error("{0}")]
     ExternalCommandError(String),
 }
