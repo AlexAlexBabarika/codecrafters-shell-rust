@@ -13,6 +13,7 @@ pub fn get_builtin_command(
         BuiltinCommandName::Echo => Box::new(echo_cmd::ECHO::new()),
         BuiltinCommandName::Pwd => Box::new(pwd_cmd::PWD::new()),
         BuiltinCommandName::Cd => Box::new(cd_cmd::CD::new()),
+        BuiltinCommandName::Complete => Box::new(complete_cmd::COMPLETE::new()),
     };
     Ok(cmd)
 }

@@ -8,6 +8,7 @@ pub enum BuiltinCommandName {
     Exit,
     Pwd,
     Cd,
+    Complete,
 }
 
 impl BuiltinCommandName {
@@ -18,6 +19,7 @@ impl BuiltinCommandName {
             Self::Exit => "exit",
             Self::Pwd => "pwd",
             Self::Cd => "cd",
+            Self::Complete => "complete",
         }
     }
 }
@@ -30,6 +32,7 @@ pub fn get_builtin_command_names(add_trailing_whitespace: bool) -> Vec<String> {
             format!("{} ", BuiltinCommandName::Exit.as_str()),
             format!("{} ", BuiltinCommandName::Pwd.as_str()),
             format!("{} ", BuiltinCommandName::Cd.as_str()),
+            format!("{} ", BuiltinCommandName::Complete.as_str()),
         ]
     } else {
         vec![
@@ -38,6 +41,7 @@ pub fn get_builtin_command_names(add_trailing_whitespace: bool) -> Vec<String> {
             BuiltinCommandName::Exit.as_str().to_string(),
             BuiltinCommandName::Pwd.as_str().to_string(),
             BuiltinCommandName::Cd.as_str().to_string(),
+            BuiltinCommandName::Complete.as_str().to_string(),
         ]
     }
 }
@@ -61,6 +65,7 @@ impl FromStr for BuiltinCommandName {
             "exit" => Ok(Self::Exit),
             "pwd" => Ok(Self::Pwd),
             "cd" => Ok(Self::Cd),
+            "complete" => Ok(Self::Complete),
             _ => Err(UnknownCommandName),
         }
     }
