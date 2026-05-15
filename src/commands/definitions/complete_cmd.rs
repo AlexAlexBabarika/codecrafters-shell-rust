@@ -55,7 +55,7 @@ impl Execute for COMPLETE {
                             message: "missing completion specification argument for -C option"
                                 .to_string(),
                         })?;
-                
+
                 let cmd_name = args
                     .get(2)
                     .ok_or_else(|| ShellCommandError::InvalidArguments {

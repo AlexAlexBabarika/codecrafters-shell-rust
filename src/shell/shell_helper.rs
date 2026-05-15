@@ -1,3 +1,4 @@
+use crate::completion_registry::completion_registry::get_completion;
 use crate::shell::completer_cache::{completion_names_cached, current_dir_entries_cached};
 use crate::util::path_utilities::get_matching_entries_in_directory;
 use rustyline::completion::{Completer, Pair};
@@ -5,6 +6,7 @@ use rustyline::highlight::Highlighter;
 use rustyline::hint::Hinter;
 use rustyline::validate::Validator;
 use rustyline::{Context, Helper, Result};
+use std::process::Command;
 
 pub struct ShellHelper;
 
@@ -17,6 +19,28 @@ impl Completer for ShellHelper {
             .map(|i| i + 1)
             .unwrap_or(0);
         let prefix = &line[start..pos];
+
+        if !line[..start].trim().is_empty() {
+            let cmd_name = line[..start]
+                .split_whitespace()
+                .next()
+                .unwrap_or("")
+                .to_string();
+            if let Some(spec) = get_completion(&cmd_name) {
+                if let Ok(output) = Command::new(&spec).output() {
+                    let stdout = String::from_utf8_lossy(&output.stdout);
+                    let matches: Vec<Pair> = stdout
+                        .lines()
+                        .filter(|l| l.starts_with(prefix))
+                        .map(|l| Pair {
+                            display: l.to_string(),
+                            replacement: format!("{} ", l),
+                        })
+                        .collect();
+                    return Ok((start, matches));
+                }
+            }
+        }
 
         let names = if line[..start].trim().is_empty() {
             completion_names_cached()
